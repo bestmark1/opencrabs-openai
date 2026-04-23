@@ -1,6 +1,6 @@
 import re
 
-from services.agent_core.app.contracts import ParserRequest
+from services.agent_core.app.contracts import ParserRequest, ParserRun
 from services.agent_core.app.router import normalized
 
 
@@ -26,22 +26,22 @@ def extract_parser_request(text: str) -> ParserRequest | None:
     return ParserRequest(peer=f"@{peer_match.group(1)}", limit=limit, source_kind=source_kind)
 
 
-def render_parser_summary(request: ParserRequest, items: list[dict]) -> str:
-    if not items:
+def render_parser_summary(run: ParserRun) -> str:
+    if not run.items:
         return (
-            f"Не удалось получить данные из {request.peer}."
-            if request.source_kind == "messages"
-            else f"Не удалось получить посты из {request.peer}."
+            f"Не удалось получить данные из {run.source.peer}."
+            if run.source.source_kind == "messages"
+            else f"Не удалось получить посты из {run.source.peer}."
         )
 
     lines = [
-        f"Источник: {request.peer}",
-        f"Тип: {'posts' if request.source_kind == 'posts' else 'messages'}",
-        f"Получено: {len(items)}",
+        f"Источник: {run.source.peer}",
+        f"Тип: {'posts' if run.source.source_kind == 'posts' else 'messages'}",
+        f"Получено: {run.item_count}",
         "Последние элементы:",
     ]
-    for item in items[:5]:
-        snippet = str(item.get("text") or "").strip().replace("\n", " ")
+    for item in run.items[:5]:
+        snippet = str(item.text or "").strip().replace("\n", " ")
         if len(snippet) > 120:
             snippet = snippet[:117] + "..."
         lines.append(f"- {snippet or '[empty]'}")

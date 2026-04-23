@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
@@ -37,3 +37,22 @@ class ParserItem:
     date: str | None
     reply_to_msg_id: int | None
     out: bool
+
+
+@dataclass
+class ParserSource:
+    peer: str
+    source_kind: str
+    limit: int
+    resolved_peer: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ParserRun:
+    source: ParserSource
+    item_count: int
+    items: list[ParserItem]
+    collected_at: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)

@@ -23,6 +23,7 @@ from services.agent_core.app.contracts import AgentContext
 from services.agent_core.app.hooks import handle_default_mode, handle_operator_mode
 from services.agent_core.app.modes import DEFAULT_MODE, OPERATOR_MODE, PARSER_MODE
 from services.agent_core.app.parser import extract_parser_request, render_parser_summary
+from services.agent_core.app.pipeline import build_parser_run, normalize_parser_items
 from services.agent_core.app.router import is_operator_request, is_parser_request, pick_mode
 
 
@@ -64,9 +65,18 @@ class AgentRuntimeSmokeTest(unittest.TestCase):
     def test_render_parser_summary(self) -> None:
         request = extract_parser_request("parse 3 posts from @fit_channel")
         assert request is not None
-        summary = render_parser_summary(
-            request,
-            [{"text": "First post", "id": 1}, {"text": "Second post", "id": 2}],
+        run = build_parser_run(
+            peer=request.peer,
+            source_kind=request.source_kind,
+            limit=request.limit,
+            resolved_peer={"username": "fit_channel"},
+            raw_items=[{"text": "First post", "id": 1}, {"text": "Second post", "id": 2}],
         )
+        summary = render_parser_summary(run)
         self.assertIn("@fit_channel", summary)
         self.assertIn("Получено: 2", summary)
+
+    def test_normalize_parser_items(self) -> None:
+        items = normalize_parser_items([{"id": 1, "chat_id": 2, "sender_id": 3, "text": "hello", "date": None, "reply_to_msg_id": None, "out": False}])
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].text, "hello")

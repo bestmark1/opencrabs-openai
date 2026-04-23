@@ -2,7 +2,9 @@ from typing import Any
 
 from services.agent_core.app.contracts import AgentContext, AgentDecision
 from services.agent_core.app.modes import DEFAULT_MODE, OPERATOR_MODE, PARSER_MODE
+from services.agent_core.app.pipeline import build_parser_run
 from services.agent_core.app.parser import extract_parser_request, render_parser_summary
+from services.agent_core.app.storage import save_parser_run
 from services.telegram_adapter.app.commands import telegram_get_channel_posts, telegram_get_messages, telegram_resolve_peer
 
 
@@ -55,19 +57,24 @@ async def handle_parser_mode(client: Any, context: AgentContext) -> AgentDecisio
     else:
         result = await telegram_get_messages(client, {"peer": request.peer, "limit": request.limit})
 
-    items = list(result.get("items") or [])
+    raw_items = list(result.get("items") or [])
+    run = build_parser_run(
+        peer=request.peer,
+        source_kind=request.source_kind,
+        limit=request.limit,
+        resolved_peer=resolved,
+        raw_items=raw_items,
+    )
+    artifact_path = save_parser_run(run)
     return AgentDecision(
         mode=PARSER_MODE,
-        reply_text=render_parser_summary(request, items),
+        reply_text=render_parser_summary(run),
         confident=True,
         metadata={
             "action": "parse_request",
-            "request": {
-                "peer": request.peer,
-                "limit": request.limit,
-                "source_kind": request.source_kind,
-            },
-            "resolved_peer": resolved,
-            "items": items,
+            "request": run.source.__dict__,
+            "item_count": run.item_count,
+            "items": [item.__dict__ for item in run.items],
+            "artifact_path": artifact_path,
         },
     )
