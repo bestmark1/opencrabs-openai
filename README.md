@@ -1,8 +1,8 @@
 # OpenCrabs Agent Base
 
-Reusable Telegram support-agent base extracted from the FitMentor support runtime.
+Reusable Telegram support-agent base extracted from a production support runtime and stripped down to a reusable core.
 
-## What is included
+## Included
 
 - Telethon transport
 - listener runtime
@@ -11,7 +11,7 @@ Reusable Telegram support-agent base extracted from the FitMentor support runtim
 - review/candidate hooks
 - minimal project layout for reuse in another product
 
-## What is intentionally not included
+## Not Included
 
 - FitMentor-specific copy
 - FitMentor subscription/payment checks
@@ -29,7 +29,7 @@ opencrabs-agent-base/
   tests/
 ```
 
-## Quick start
+## Quick Start
 
 1. Copy `.env.example` to `.env`.
 2. Fill Telegram session settings.
@@ -40,7 +40,7 @@ opencrabs-agent-base/
 python scripts/support_listener.py
 ```
 
-## Extension points
+## Extension Points
 
 - `build_support_reply`
 - `fetch_account_context`
@@ -48,6 +48,15 @@ python scripts/support_listener.py
 - `is_operator_request`
 - `record_support_event`
 
-## Status
+## Publish Notes
 
-This is the first extraction pass: transport and runtime are already reusable, while product hooks are still placeholder interfaces.
+- This is the first extraction pass.
+- Transport and runtime are reusable.
+- Product hooks are still placeholders and should be implemented per project.
+- The current local repo path is `/tmp/opencrabs-agent-base`.
+
+## Suggested GitHub Names
+
+- `opencrabs-agent-base`
+- `opencrabs-telegram-agent`
+- `opencrabs-support-runtime`
