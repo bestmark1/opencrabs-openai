@@ -1,8 +1,28 @@
 import unittest
+import sys
+import types
+
+
+def _install_telethon_stubs() -> None:
+    telethon = types.ModuleType("telethon")
+    telethon.TelegramClient = type("TelegramClient", (), {})
+    sys.modules["telethon"] = telethon
+
+    tl_module = types.ModuleType("telethon.tl")
+    custom_module = types.ModuleType("telethon.tl.custom")
+    message_module = types.ModuleType("telethon.tl.custom.message")
+    message_module.Message = type("Message", (), {})
+    sys.modules["telethon.tl"] = tl_module
+    sys.modules["telethon.tl.custom"] = custom_module
+    sys.modules["telethon.tl.custom.message"] = message_module
+
+
+_install_telethon_stubs()
 
 from services.agent_core.app.contracts import AgentContext
-from services.agent_core.app.hooks import handle_default_mode, handle_operator_mode, handle_parser_mode
+from services.agent_core.app.hooks import handle_default_mode, handle_operator_mode
 from services.agent_core.app.modes import DEFAULT_MODE, OPERATOR_MODE, PARSER_MODE
+from services.agent_core.app.parser import extract_parser_request, render_parser_summary
 from services.agent_core.app.router import is_operator_request, is_parser_request, pick_mode
 
 
@@ -28,12 +48,25 @@ class AgentRuntimeSmokeTest(unittest.TestCase):
         self.assertEqual(decision.mode, DEFAULT_MODE)
         self.assertIn("спарсить", decision.reply_text)
 
-    def test_parser_handler_reply(self) -> None:
-        decision = handle_parser_mode(AgentContext(message_text="собери посты", sender_id=1, chat_id=1))
-        self.assertEqual(decision.mode, PARSER_MODE)
-        self.assertIn("Запрос на парсинг принят", decision.reply_text)
-
     def test_operator_handler_reply(self) -> None:
         decision = handle_operator_mode(AgentContext(message_text="что по парсеру", sender_id=1, chat_id=1))
         self.assertEqual(decision.mode, OPERATOR_MODE)
         self.assertIn("Режим оператора", decision.reply_text)
+
+    def test_extract_parser_request(self) -> None:
+        request = extract_parser_request("спарси 7 постов из @fit_channel")
+        self.assertIsNotNone(request)
+        assert request is not None
+        self.assertEqual(request.peer, "@fit_channel")
+        self.assertEqual(request.limit, 7)
+        self.assertEqual(request.source_kind, "posts")
+
+    def test_render_parser_summary(self) -> None:
+        request = extract_parser_request("parse 3 posts from @fit_channel")
+        assert request is not None
+        summary = render_parser_summary(
+            request,
+            [{"text": "First post", "id": 1}, {"text": "Second post", "id": 2}],
+        )
+        self.assertIn("@fit_channel", summary)
+        self.assertIn("Получено: 2", summary)

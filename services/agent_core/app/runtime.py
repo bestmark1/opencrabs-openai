@@ -75,7 +75,7 @@ async def process_message(
     if mode == OPERATOR_MODE:
         decision = handle_operator_mode(context)
     elif mode == PARSER_MODE:
-        decision = handle_parser_mode(context)
+        decision = await handle_parser_mode(tg_client, context)
     else:
         decision = handle_default_mode(context)
 

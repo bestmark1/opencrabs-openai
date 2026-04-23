@@ -19,3 +19,21 @@ class AgentDecision:
     reply_text: str = ""
     confident: bool = False
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ParserRequest:
+    peer: str
+    limit: int = 10
+    source_kind: str = "messages"
+
+
+@dataclass
+class ParserItem:
+    id: int | None
+    chat_id: int | None
+    sender_id: int | None
+    text: str
+    date: str | None
+    reply_to_msg_id: int | None
+    out: bool
