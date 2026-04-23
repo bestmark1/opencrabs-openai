@@ -1,30 +1,31 @@
 # OpenCrabs Agent Base
 
-Reusable Telegram support-agent base extracted from a production support runtime and stripped down to a reusable core.
+Reusable Telegram parser-agent base with a small runtime core and project hooks.
 
 ## Included
 
 - Telethon transport
 - listener runtime
+- parser mode entrypoint
 - operator mode entrypoint
-- support message routing contracts
-- review/candidate hooks
+- generic message routing contracts
+- project hooks
 - minimal project layout for reuse in another product
 
 ## Not Included
 
-- FitMentor-specific copy
-- FitMentor subscription/payment checks
-- FitMentor KB content and migrations
-- FitMentor-specific issue buckets
+- FitMentor support logic
+- payment/subscription flows
+- KB candidate review flows
+- product-specific parsing rules
 
 ## Structure
 
 ```text
 opencrabs-agent-base/
-  scripts/support_listener.py
+  scripts/listener.py
   services/telegram_adapter/app/
-  services/support_core/app/
+  services/agent_core/app/
   docs/
   tests/
 ```
@@ -33,20 +34,21 @@ opencrabs-agent-base/
 
 1. Copy `.env.example` to `.env`.
 2. Fill Telegram session settings.
-3. Implement project hooks in `services/support_core/app/hooks.py`.
+3. Implement project hooks in `services/agent_core/app/hooks.py`.
 4. Start the listener:
 
 ```bash
-python scripts/support_listener.py
+python scripts/listener.py
 ```
 
 ## Extension Points
 
-- `build_support_reply`
+- `handle_default_mode`
+- `handle_parser_mode`
+- `handle_operator_mode`
 - `fetch_account_context`
-- `build_candidate_draft`
 - `is_operator_request`
-- `record_support_event`
+- `is_parser_request`
 
 ## Publish Notes
 
@@ -59,4 +61,4 @@ python scripts/support_listener.py
 
 - `opencrabs-agent-base`
 - `opencrabs-telegram-agent`
-- `opencrabs-support-runtime`
+- `opencrabs-parser-runtime`

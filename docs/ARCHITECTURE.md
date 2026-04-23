@@ -5,25 +5,24 @@
 1. `telegram_adapter`
 Transport and listener runtime around Telethon.
 
-2. `support_core`
-Generic routing, operator-mode separation, reply contracts, and product hooks.
+2. `agent_core`
+Generic routing, parser-mode separation, operator-mode separation, reply contracts, and project hooks.
 
 3. `product hooks`
-Project-specific logic: payments, subscription checks, KB integration, copy, and issue buckets.
+Project-specific logic: parsing rules, extraction targets, persistence, scoring, and post-processing.
 
 ## Design rule
 
 The base repo should know how to:
 
 - receive Telegram messages,
-- separate operator traffic from support traffic,
+- separate operator traffic from parser traffic,
 - call project hooks,
 - send replies,
 - expose stable extension points.
 
 The base repo should not know:
 
-- what Premium means,
-- what product tiers exist,
-- where the product stores subscription data,
-- what exact support copy is used.
+- what product-specific entities are being parsed,
+- where parsed results are stored,
+- what scoring or enrichment pipeline a project uses.

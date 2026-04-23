@@ -3,8 +3,8 @@ from typing import Any
 
 
 @dataclass
-class SupportContext:
-    user_text: str
+class AgentContext:
+    message_text: str
     sender_id: int | None
     chat_id: int | None
     language: str = "ru"
@@ -14,8 +14,8 @@ class SupportContext:
 
 
 @dataclass
-class ReplyDecision:
-    reply_text: str
-    confident: bool
-    mode: str = "support"
+class AgentDecision:
+    mode: str
+    reply_text: str = ""
+    confident: bool = False
     metadata: dict[str, Any] = field(default_factory=dict)

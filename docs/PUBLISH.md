@@ -6,7 +6,7 @@
 2. Develop extraction only in this separate repository.
 3. Publish this repository under a new GitHub repo.
 4. Continue moving generic logic here in small passes.
-5. Do not switch production to this repo until project hooks are implemented.
+5. Do not switch production to this repo until parser hooks are implemented.
 
 ## Commands
 

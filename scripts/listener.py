@@ -7,7 +7,7 @@ import traceback
 
 from telethon import events
 
-from services.support_core.app.runtime import process_support_message
+from services.agent_core.app.runtime import process_message
 from services.telegram_adapter.app.client import create_client
 
 
@@ -39,7 +39,7 @@ async def main() -> int:
                 print(json.dumps({"ok": True, "status": "message_ignored", "message_id": event.message.id}), flush=True)
                 return
 
-            result = await process_support_message(client, event.message)
+            result = await process_message(client, event.message)
             print(json.dumps(result, ensure_ascii=False), flush=True)
         except Exception as exc:
             print(
