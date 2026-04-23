@@ -1,6 +1,12 @@
 from typing import Any
 
+from services.support_core.app.candidates import build_candidate_draft as default_build_candidate_draft
 from services.support_core.app.contracts import ReplyDecision, SupportContext
+from services.support_core.app.intents import is_operator_request as default_is_operator_request
+from services.support_core.app.replies import (
+    build_operator_reply as default_build_operator_reply,
+    build_support_reply as default_build_support_reply,
+)
 
 
 async def fetch_account_context(*, sender_id: int | None) -> dict[str, Any] | None:
@@ -9,34 +15,16 @@ async def fetch_account_context(*, sender_id: int | None) -> dict[str, Any] | No
 
 
 def build_support_reply(context: SupportContext) -> ReplyDecision:
-    text = context.user_text.strip()
-    if not text:
-        return ReplyDecision(reply_text="", confident=True, metadata={"status": "empty"})
-    return ReplyDecision(
-        reply_text="Какой у вас вопрос? Постараюсь помочь.",
-        confident=False,
-    )
+    return default_build_support_reply(context)
 
 
 def build_operator_reply(*, text: str, language: str) -> str:
-    if language == "en":
-        return "Tell me directly what to inspect: support, manual review, payments, or candidates."
-    return "Напишите прямо, что посмотреть: поддержку, ручную проверку, оплаты или кандидатов."
+    return default_build_operator_reply(text=text, language=language)
 
 
 def build_candidate_draft(context: SupportContext, decision: ReplyDecision) -> dict[str, Any] | None:
-    del context, decision
-    return None
+    return default_build_candidate_draft(context, decision)
 
 
 def is_operator_request(text: str) -> bool:
-    normalized = " ".join(text.strip().lower().split())
-    triggers = (
-        "что по поддержке",
-        "сводка",
-        "manual review",
-        "pending candidates",
-        "кандидаты",
-        "ручная проверка",
-    )
-    return any(token in normalized for token in triggers)
+    return default_is_operator_request(text)

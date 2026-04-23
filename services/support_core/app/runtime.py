@@ -4,6 +4,7 @@ from telethon import TelegramClient
 from telethon.tl.custom.message import Message
 
 from services.support_core.app.contracts import SupportContext
+from services.support_core.app.intents import is_support_like_request
 from services.support_core.app.hooks import (
     build_candidate_draft,
     build_operator_reply,
@@ -20,7 +21,9 @@ def _normalized(text: str) -> str:
 
 
 def detect_language(text: str) -> str:
-    del text
+    lowered = (text or "").lower()
+    if any(token in lowered for token in ("hello", "payment", "refund", "support", "access")):
+        return "en"
     return "ru"
 
 
@@ -77,8 +80,13 @@ async def process_support_message(
     support_test_mode, effective_text = extract_owner_support_test(message_text)
     language = detect_language(effective_text or message_text)
     is_test = bool(support_test_mode or settings.is_test_user(sender_id))
+    owner_support_like = bool(
+        is_owner
+        and not support_test_mode
+        and is_support_like_request(effective_text or message_text, language)
+    )
 
-    if is_owner and not support_test_mode and is_operator_request(message_text):
+    if is_owner and not support_test_mode and not owner_support_like and is_operator_request(message_text):
         reply_text = build_operator_reply(text=message_text, language=language)
         sent = await _send_reply_for_message(tg_client, message, reply_text=reply_text)
         return {
